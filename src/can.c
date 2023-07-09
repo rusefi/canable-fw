@@ -18,6 +18,20 @@ static can_bus_state_t bus_state = OFF_BUS;
 static uint8_t can_autoretransmit = ENABLE;
 static can_txbuf_t txqueue = {0};
 
+static void can_set_filter() {
+    // Initialize default CAN filter configuration
+    filter.FilterIdHigh = 0;
+    filter.FilterIdLow = 0;
+    filter.FilterMaskIdHigh = 0;
+    filter.FilterMaskIdLow = 0;
+    filter.FilterFIFOAssignment = CAN_RX_FIFO0;
+    filter.FilterBank = 0;
+    filter.FilterMode = CAN_FILTERMODE_IDMASK;
+    filter.FilterScale = CAN_FILTERSCALE_32BIT;
+    filter.FilterActivation = ENABLE;
+
+    HAL_CAN_ConfigFilter(&can_handle, &filter);
+}
 
 // Initialize CAN peripheral settings, but don't actually start the peripheral
 void can_init(void)
@@ -35,19 +49,6 @@ void can_init(void)
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
     GPIO_InitStruct.Alternate = GPIO_AF4_CAN;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-
-    // Initialize default CAN filter configuration
-    filter.FilterIdHigh = 0;
-    filter.FilterIdLow = 0;
-    filter.FilterMaskIdHigh = 0;
-    filter.FilterMaskIdLow = 0;
-    filter.FilterFIFOAssignment = CAN_RX_FIFO0;
-    filter.FilterBank = 0;
-    filter.FilterMode = CAN_FILTERMODE_IDMASK;
-    filter.FilterScale = CAN_FILTERSCALE_32BIT;
-    filter.FilterActivation = ENABLE;
-
 
     // default to 125 kbit/s
     prescaler = 48;
@@ -79,7 +80,7 @@ void can_enable(void)
     	can_handle.Init.TransmitFifoPriority = ENABLE;
         HAL_CAN_Init(&can_handle);
 
-        HAL_CAN_ConfigFilter(&can_handle, &filter);
+        can_set_filter();
 
         HAL_CAN_Start(&can_handle);
         bus_state = ON_BUS;
