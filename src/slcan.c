@@ -109,17 +109,15 @@ int8_t slcan_parse_str(uint8_t *buf, uint8_t len)
     // Process command
     switch(buf[0])
     {
-		case 'O':
-			// Open channel command
+		case SLCAN_OPEN_CHANNEL:
 			can_enable();
 			return 0;
 
-		case 'C':
-			// Close channel command
+		case SLCAN_CLOSE_CHANNEL:
 			can_disable();
 			return 0;
 
-		case 'S':
+		case SLCAN_SET_BITRATE_CANONICAL:
 			// Set bitrate command
 
 			// Check for valid bitrate
@@ -131,8 +129,8 @@ int8_t slcan_parse_str(uint8_t *buf, uint8_t len)
 			can_set_bitrate(buf[1]);
 			return 0;
 
-		case 'm':
-		case 'M':
+		case CANTACT_SET_MODE1:
+		case CANTACT_SET_MODE2:
 			// Set mode command
 			if (buf[1] == 1)
 			{
@@ -145,7 +143,7 @@ int8_t slcan_parse_str(uint8_t *buf, uint8_t len)
 			return 0;
 
 		case 'a':
-		case 'A':
+		case SLCAN_FIFO_POLL_ALL:
 			// Set autoretry command
 			if (buf[1] == 1)
 			{
@@ -157,7 +155,7 @@ int8_t slcan_parse_str(uint8_t *buf, uint8_t len)
 			}
 			return 0;
 
-		case 'V':
+		case SLCAN_GET_HARDWARE_VERSION:
 		{
 			// Report firmware version and remote
 			char* fw_id = GIT_VERSION " " GIT_REMOTE "\r";
@@ -166,7 +164,7 @@ int8_t slcan_parse_str(uint8_t *buf, uint8_t len)
 		}
 
 	    // Nonstandard!
-		case 'E':
+		case MICTRONICS_GET_ERROR:
 		{
 	        // Report error register
 			char errstr[64] = {0};
@@ -175,16 +173,16 @@ int8_t slcan_parse_str(uint8_t *buf, uint8_t len)
 	        return 0;
 		}
 
-		case 'T':
+		case SLCAN_TRANSMIT_EXTENDED:
 	    	frame_header.IDE = CAN_ID_EXT;
-		case 't':
+		case SLCAN_TRANSMIT_STANDARD:
 			// Transmit data frame command
 			frame_header.RTR = CAN_RTR_DATA;
 			break;
 
-		case 'R':
+		case SLCAN_TRANSMIT_REQUEST_EXTENDED:
 	    	frame_header.IDE = CAN_ID_EXT;
-		case 'r':
+		case SLCAN_TRANSMIT_REQUEST_STANDARD:
 			// Transmit remote frame command
 			frame_header.RTR = CAN_RTR_REMOTE;
 			break;
